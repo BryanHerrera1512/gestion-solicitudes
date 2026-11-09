@@ -1,0 +1,261 @@
+openapi: 3.1.0
+info:
+  title: API de Gestion de Solicitudes
+  description: "Endpoints para registrar, listar, consultar y exportar solicitudes"
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Solicitudes
+  description: Operaciones disponibles para las solicitudes
+paths:
+  /api/solicitudes:
+    get:
+      tags:
+      - Solicitudes
+      summary: "Listar, filtrar y ordenar solicitudes"
+      operationId: listar
+      parameters:
+      - name: fecha
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: tipoSolicitud
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ordenarPor
+        in: query
+        required: false
+        schema:
+          type: string
+          default: codigo
+      - name: direccion
+        in: query
+        required: false
+        schema:
+          type: string
+          default: asc
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SolicitudResponse"
+    post:
+      tags:
+      - Solicitudes
+      summary: Registrar una solicitud
+      operationId: registrar
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudRequest"
+        required: true
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Solicitud"
+  /api/solicitudes/{codigo}:
+    get:
+      tags:
+      - Solicitudes
+      summary: Consultar una solicitud por su codigo
+      operationId: consultarPorCodigo
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SolicitudResponse"
+  /api/solicitudes/exportar:
+    get:
+      tags:
+      - Solicitudes
+      summary: Exportar solicitudes en formato CSV
+      operationId: exportar
+      parameters:
+      - name: fecha
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: tipoSolicitud
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ordenarPor
+        in: query
+        required: false
+        schema:
+          type: string
+          default: codigo
+      - name: direccion
+        in: query
+        required: false
+        schema:
+          type: string
+          default: asc
+      responses:
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: byte
+components:
+  schemas:
+    ContactoRequest:
+      type: object
+      properties:
+        nombreContacto:
+          type: string
+          maxLength: 150
+          minLength: 0
+        numeroContacto:
+          type: string
+          maxLength: 20
+          minLength: 0
+          pattern: "^[0-9]+$"
+      required:
+      - nombreContacto
+      - numeroContacto
+    SolicitudRequest:
+      type: object
+      properties:
+        marca:
+          type: string
+          maxLength: 100
+          minLength: 0
+        tipoSolicitud:
+          type: string
+          maxLength: 100
+          minLength: 0
+        fechaEnvio:
+          type: string
+          format: date
+        numeroContacto:
+          type: string
+          maxLength: 20
+          minLength: 0
+          pattern: "^[0-9]+$"
+        nombreContacto:
+          type: string
+          maxLength: 150
+          minLength: 0
+        contactos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactoRequest"
+      required:
+      - contactos
+      - fechaEnvio
+      - marca
+      - nombreContacto
+      - numeroContacto
+      - tipoSolicitud
+    Solicitud:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          format: int64
+        marca:
+          type: string
+        tipoSolicitud:
+          type: string
+        fechaEnvio:
+          type: string
+          format: date
+        numeroContacto:
+          type: string
+        nombreContacto:
+          type: string
+    ContactoSolicitud:
+      type: object
+      properties:
+        identificador:
+          type: integer
+          format: int64
+        solicitudId:
+          type: integer
+          format: int64
+        nombreContacto:
+          type: string
+        numeroContacto:
+          type: string
+    SolicitudResponse:
+      type: object
+      properties:
+        codigo:
+          type: integer
+          format: int64
+        marca:
+          type: string
+        tipoSolicitud:
+          type: string
+        fechaEnvio:
+          type: string
+          format: date
+        numeroContacto:
+          type: string
+        nombreContacto:
+          type: string
+        contactos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactoSolicitud"
